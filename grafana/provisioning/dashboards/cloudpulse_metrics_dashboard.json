@@ -1,0 +1,1373 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Telegraf-styled system metrics dashboard powered by Kafka -> Spark Structured Streaming -> Elasticsearch",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "gnetId": 928,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 100,
+      "title": "Quick overview",
+      "type": "row"
+    },
+    {
+      "id": 10,
+      "title": "Uptime",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 1
+      },
+      "datasource": {
+        "type": "elasticsearch",
+        "uid": "cpv-metrics-raw"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "host: ($host)",
+          "metrics": [
+            {
+              "type": "avg",
+              "id": "1",
+              "field": "uptime_seconds"
+            }
+          ],
+          "bucketAggs": [],
+          "timeField": "timestamp",
+          "index": "metrics_raw"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#60a5fa"
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none"
+      }
+    },
+    {
+      "id": 11,
+      "title": "CPU usage",
+      "type": "gauge",
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 4,
+        "y": 1
+      },
+      "datasource": {
+        "type": "elasticsearch",
+        "uid": "cpv-metrics-raw"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "host: ($host)",
+          "metrics": [
+            {
+              "type": "avg",
+              "id": "1",
+              "field": "cpu_percent"
+            }
+          ],
+          "bucketAggs": [],
+          "timeField": "timestamp",
+          "index": "metrics_raw"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#10b981",
+                "value": null
+              },
+              {
+                "color": "#f59e0b",
+                "value": 70
+              },
+              {
+                "color": "#ef4444",
+                "value": 90
+              }
+            ]
+          },
+          "min": 0,
+          "max": 100,
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      }
+    },
+    {
+      "id": 12,
+      "title": "RAM usage",
+      "type": "gauge",
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 7,
+        "y": 1
+      },
+      "datasource": {
+        "type": "elasticsearch",
+        "uid": "cpv-metrics-raw"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "host: ($host)",
+          "metrics": [
+            {
+              "type": "avg",
+              "id": "1",
+              "field": "memory_percent"
+            }
+          ],
+          "bucketAggs": [],
+          "timeField": "timestamp",
+          "index": "metrics_raw"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#10b981",
+                "value": null
+              },
+              {
+                "color": "#f59e0b",
+                "value": 70
+              },
+              {
+                "color": "#ef4444",
+                "value": 90
+              }
+            ]
+          },
+          "min": 0,
+          "max": 100,
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      }
+    },
+    {
+      "id": 13,
+      "title": "Avg Disk I/O",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 10,
+        "y": 1
+      },
+      "datasource": {
+        "type": "elasticsearch",
+        "uid": "cpv-metrics-raw"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "host: ($host)",
+          "metrics": [
+            {
+              "type": "avg",
+              "id": "1",
+              "field": "disk_io_mb_per_sec"
+            }
+          ],
+          "bucketAggs": [],
+          "timeField": "timestamp",
+          "index": "metrics_raw"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#a78bfa"
+          },
+          "unit": "MBs"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "colorMode": "value",
+        "graphMode": "area"
+      }
+    },
+    {
+      "id": 14,
+      "title": "Avg Network I/O",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 13,
+        "y": 1
+      },
+      "datasource": {
+        "type": "elasticsearch",
+        "uid": "cpv-metrics-raw"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "host: ($host)",
+          "metrics": [
+            {
+              "type": "avg",
+              "id": "1",
+              "field": "network_io_mb_per_sec"
+            }
+          ],
+          "bucketAggs": [],
+          "timeField": "timestamp",
+          "index": "metrics_raw"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#38bdf8"
+          },
+          "unit": "MBs"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "colorMode": "value",
+        "graphMode": "area"
+      }
+    },
+    {
+      "id": 15,
+      "title": "Active Anomalies (last 15m)",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 1
+      },
+      "datasource": {
+        "type": "elasticsearch",
+        "uid": "cpv-metrics-anomalies"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "host: ($host)",
+          "metrics": [
+            {
+              "type": "count",
+              "id": "1"
+            }
+          ],
+          "bucketAggs": [],
+          "timeField": "window_start",
+          "index": "metrics_anomalies"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#10b981",
+                "value": null
+              },
+              {
+                "color": "#f59e0b",
+                "value": 1
+              },
+              {
+                "color": "#ef4444",
+                "value": 3
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "count"
+          ],
+          "fields": ""
+        },
+        "colorMode": "background",
+        "graphMode": "area"
+      }
+    },
+    {
+      "id": 16,
+      "title": "Monitored Hosts",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 1
+      },
+      "datasource": {
+        "type": "elasticsearch",
+        "uid": "cpv-metrics-raw"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "host: ($host)",
+          "metrics": [
+            {
+              "type": "cardinality",
+              "id": "1",
+              "field": "host"
+            }
+          ],
+          "bucketAggs": [],
+          "timeField": "timestamp",
+          "index": "metrics_raw"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#818cf8"
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "colorMode": "value",
+        "graphMode": "none"
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "id": 101,
+      "title": "CPU",
+      "type": "row"
+    },
+    {
+      "id": 20,
+      "title": "CPU usage % over time",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 16,
+        "x": 0,
+        "y": 6
+      },
+      "datasource": {
+        "type": "elasticsearch",
+        "uid": "cpv-metrics-raw"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "host: ($host)",
+          "metrics": [
+            {
+              "type": "avg",
+              "id": "1",
+              "field": "cpu_percent"
+            }
+          ],
+          "bucketAggs": [
+            {
+              "type": "date_histogram",
+              "id": "2",
+              "field": "timestamp",
+              "settings": {
+                "interval": "auto",
+                "min_doc_count": 0
+              }
+            },
+            {
+              "type": "terms",
+              "id": "3",
+              "field": "host",
+              "settings": {
+                "size": "10",
+                "order": "desc",
+                "orderBy": "_count"
+              }
+            }
+          ],
+          "timeField": "timestamp",
+          "index": "metrics_raw"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "gradientMode": "opacity",
+            "spanNulls": true
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#10b981",
+                "value": null
+              },
+              {
+                "color": "#f59e0b",
+                "value": 70
+              },
+              {
+                "color": "#ef4444",
+                "value": 90
+              }
+            ]
+          },
+          "min": 0,
+          "max": 100,
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "alignAsTable": true,
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max",
+            "mean"
+          ]
+        }
+      }
+    },
+    {
+      "id": 21,
+      "title": "30s Windowed CPU Aggregations",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 6
+      },
+      "datasource": {
+        "type": "elasticsearch",
+        "uid": "cpv-metrics-windowed"
+      },
+      "targets": [
+        {
+          "refId": "Avg",
+          "query": "host: ($host)",
+          "metrics": [
+            {
+              "type": "avg",
+              "id": "1",
+              "field": "avg_cpu_percent"
+            }
+          ],
+          "bucketAggs": [
+            {
+              "type": "date_histogram",
+              "id": "2",
+              "field": "window_start",
+              "settings": {
+                "interval": "auto",
+                "min_doc_count": 0
+              }
+            },
+            {
+              "type": "terms",
+              "id": "3",
+              "field": "host",
+              "settings": {
+                "size": "10",
+                "order": "desc",
+                "orderBy": "_count"
+              }
+            }
+          ],
+          "timeField": "window_start",
+          "index": "metrics_windowed"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "spanNulls": true
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "min": 0,
+          "max": 100,
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        }
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "id": 102,
+      "title": "Memory",
+      "type": "row"
+    },
+    {
+      "id": 30,
+      "title": "Memory usage % over time",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 16,
+        "x": 0,
+        "y": 15
+      },
+      "datasource": {
+        "type": "elasticsearch",
+        "uid": "cpv-metrics-raw"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "host: ($host)",
+          "metrics": [
+            {
+              "type": "avg",
+              "id": "1",
+              "field": "memory_percent"
+            }
+          ],
+          "bucketAggs": [
+            {
+              "type": "date_histogram",
+              "id": "2",
+              "field": "timestamp",
+              "settings": {
+                "interval": "auto",
+                "min_doc_count": 0
+              }
+            },
+            {
+              "type": "terms",
+              "id": "3",
+              "field": "host",
+              "settings": {
+                "size": "10",
+                "order": "desc",
+                "orderBy": "_count"
+              }
+            }
+          ],
+          "timeField": "timestamp",
+          "index": "metrics_raw"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "gradientMode": "opacity",
+            "spanNulls": true
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#10b981",
+                "value": null
+              },
+              {
+                "color": "#f59e0b",
+                "value": 70
+              },
+              {
+                "color": "#ef4444",
+                "value": 90
+              }
+            ]
+          },
+          "min": 0,
+          "max": 100,
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "alignAsTable": true,
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max",
+            "mean"
+          ]
+        }
+      }
+    },
+    {
+      "id": 31,
+      "title": "30s Windowed Memory Aggregations",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 15
+      },
+      "datasource": {
+        "type": "elasticsearch",
+        "uid": "cpv-metrics-windowed"
+      },
+      "targets": [
+        {
+          "refId": "Avg",
+          "query": "host: ($host)",
+          "metrics": [
+            {
+              "type": "avg",
+              "id": "1",
+              "field": "avg_memory_percent"
+            }
+          ],
+          "bucketAggs": [
+            {
+              "type": "date_histogram",
+              "id": "2",
+              "field": "window_start",
+              "settings": {
+                "interval": "auto",
+                "min_doc_count": 0
+              }
+            },
+            {
+              "type": "terms",
+              "id": "3",
+              "field": "host",
+              "settings": {
+                "size": "10",
+                "order": "desc",
+                "orderBy": "_count"
+              }
+            }
+          ],
+          "timeField": "window_start",
+          "index": "metrics_windowed"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "spanNulls": true
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "min": 0,
+          "max": 100,
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        }
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 23
+      },
+      "id": 103,
+      "title": "Disk / Storage I/O",
+      "type": "row"
+    },
+    {
+      "id": 40,
+      "title": "Disk I/O over time (MB/s)",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 16,
+        "x": 0,
+        "y": 24
+      },
+      "datasource": {
+        "type": "elasticsearch",
+        "uid": "cpv-metrics-raw"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "host: ($host)",
+          "metrics": [
+            {
+              "type": "avg",
+              "id": "1",
+              "field": "disk_io_mb_per_sec"
+            }
+          ],
+          "bucketAggs": [
+            {
+              "type": "date_histogram",
+              "id": "2",
+              "field": "timestamp",
+              "settings": {
+                "interval": "auto",
+                "min_doc_count": 0
+              }
+            },
+            {
+              "type": "terms",
+              "id": "3",
+              "field": "host",
+              "settings": {
+                "size": "10",
+                "order": "desc",
+                "orderBy": "_count"
+              }
+            }
+          ],
+          "timeField": "timestamp",
+          "index": "metrics_raw"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "spanNulls": true
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "min": 0,
+          "unit": "MBs"
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "alignAsTable": true,
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max",
+            "mean"
+          ]
+        }
+      }
+    },
+    {
+      "id": 41,
+      "title": "30s Windowed Disk I/O Aggregations",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 24
+      },
+      "datasource": {
+        "type": "elasticsearch",
+        "uid": "cpv-metrics-windowed"
+      },
+      "targets": [
+        {
+          "refId": "Avg",
+          "query": "host: ($host)",
+          "metrics": [
+            {
+              "type": "avg",
+              "id": "1",
+              "field": "avg_disk_io_mb_per_sec"
+            }
+          ],
+          "bucketAggs": [
+            {
+              "type": "date_histogram",
+              "id": "2",
+              "field": "window_start",
+              "settings": {
+                "interval": "auto",
+                "min_doc_count": 0
+              }
+            },
+            {
+              "type": "terms",
+              "id": "3",
+              "field": "host",
+              "settings": {
+                "size": "10",
+                "order": "desc",
+                "orderBy": "_count"
+              }
+            }
+          ],
+          "timeField": "window_start",
+          "index": "metrics_windowed"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "spanNulls": true
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "min": 0,
+          "unit": "MBs"
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        }
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 32
+      },
+      "id": 104,
+      "title": "Network I/O",
+      "type": "row"
+    },
+    {
+      "id": 50,
+      "title": "Network I/O over time (MB/s)",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 16,
+        "x": 0,
+        "y": 33
+      },
+      "datasource": {
+        "type": "elasticsearch",
+        "uid": "cpv-metrics-raw"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "host: ($host)",
+          "metrics": [
+            {
+              "type": "avg",
+              "id": "1",
+              "field": "network_io_mb_per_sec"
+            }
+          ],
+          "bucketAggs": [
+            {
+              "type": "date_histogram",
+              "id": "2",
+              "field": "timestamp",
+              "settings": {
+                "interval": "auto",
+                "min_doc_count": 0
+              }
+            },
+            {
+              "type": "terms",
+              "id": "3",
+              "field": "host",
+              "settings": {
+                "size": "10",
+                "order": "desc",
+                "orderBy": "_count"
+              }
+            }
+          ],
+          "timeField": "timestamp",
+          "index": "metrics_raw"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "spanNulls": true
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "min": 0,
+          "unit": "MBs"
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "alignAsTable": true,
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max",
+            "mean"
+          ]
+        }
+      }
+    },
+    {
+      "id": 51,
+      "title": "30s Windowed Network I/O Aggregations",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 33
+      },
+      "datasource": {
+        "type": "elasticsearch",
+        "uid": "cpv-metrics-windowed"
+      },
+      "targets": [
+        {
+          "refId": "Avg",
+          "query": "host: ($host)",
+          "metrics": [
+            {
+              "type": "avg",
+              "id": "1",
+              "field": "avg_network_io_mb_per_sec"
+            }
+          ],
+          "bucketAggs": [
+            {
+              "type": "date_histogram",
+              "id": "2",
+              "field": "window_start",
+              "settings": {
+                "interval": "auto",
+                "min_doc_count": 0
+              }
+            },
+            {
+              "type": "terms",
+              "id": "3",
+              "field": "host",
+              "settings": {
+                "size": "10",
+                "order": "desc",
+                "orderBy": "_count"
+              }
+            }
+          ],
+          "timeField": "window_start",
+          "index": "metrics_windowed"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "spanNulls": true
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "min": 0,
+          "unit": "MBs"
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        }
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 41
+      },
+      "id": 105,
+      "title": "Anomalies & Alerts",
+      "type": "row"
+    },
+    {
+      "id": 60,
+      "title": "Recent System Anomalies (CPU/Mem > 90%)",
+      "type": "table",
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 42
+      },
+      "datasource": {
+        "type": "elasticsearch",
+        "uid": "cpv-metrics-anomalies"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "host: ($host)",
+          "metrics": [
+            {
+              "type": "raw_data",
+              "id": "1",
+              "settings": {
+                "size": 50
+              }
+            }
+          ],
+          "bucketAggs": [],
+          "timeField": "window_start",
+          "index": "metrics_anomalies"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "severity"
+            },
+            "properties": [
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "CRITICAL": {
+                        "color": "#ef4444",
+                        "text": "CRITICAL",
+                        "index": 0
+                      },
+                      "WARNING": {
+                        "color": "#f59e0b",
+                        "text": "WARNING",
+                        "index": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "window_start",
+            "desc": true
+          }
+        ]
+      }
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": [
+    "cloudpulse",
+    "metrics",
+    "telegraf",
+    "elasticsearch",
+    "bigdata"
+  ],
+  "templating": {
+    "list": [
+      {
+        "allValue": "*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "elasticsearch",
+          "uid": "cpv-metrics-raw"
+        },
+        "definition": "{\"find\": \"terms\", \"field\": \"host\"}",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Host",
+        "multi": true,
+        "name": "host",
+        "options": [],
+        "query": "{\"find\": \"terms\", \"field\": \"host\"}",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "2s",
+      "5s",
+      "10s",
+      "30s",
+      "1m"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d"
+    ]
+  },
+  "timezone": "browser",
+  "title": "Telegraf: system dashboard (CloudPulse)",
+  "uid": "cloudpulse-system-metrics",
+  "version": 2
+}

@@ -1,0 +1,207 @@
+services:
+  # ============================================================
+  # VOTING APP (The Source of Data: Cat vs Dog Voting App)
+  # ============================================================
+  redis:
+    image: redis:alpine
+    container_name: cpv-redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks: [front-tier, back-tier]
+
+  db:
+    image: postgres:15-alpine
+    container_name: cpv-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks: [back-tier]
+
+  vote:
+    build: ./vote
+    container_name: cpv-vote
+    depends_on:
+      redis:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    environment:
+      - REDIS_HOST=redis
+      - AUTO_VOTE_INTERVAL=5.0
+      - AUTO_VOTE_ENABLED=true
+      - OPTION_A=Cats
+      - OPTION_B=Dogs
+    networks: [front-tier, back-tier]
+
+  worker:
+    image: dockersamples/examplevotingapp_worker
+    container_name: cpv-worker
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    networks: [back-tier]
+
+  result:
+    image: dockersamples/examplevotingapp_result
+    container_name: cpv-result
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8081:80"
+    networks: [front-tier, back-tier]
+
+  # ============================================================
+  # BIG DATA STREAMING PIPELINE (Kafka & Spark)
+  # ============================================================
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: cpv-zookeeper
+    environment:
+      - ZOOKEEPER_CLIENT_PORT=2181
+      - ZOOKEEPER_TICK_TIME=2000
+    networks: [back-tier]
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: cpv-kafka
+    depends_on: [zookeeper]
+    ports:
+      - "29092:29092"
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+    networks: [back-tier]
+
+  spark-master:
+    image: apache/spark:3.5.1
+    container_name: cpv-spark-master
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
+    ports:
+      - "8090:8080"   # Spark Master Web UI on host port 8090
+      - "7077:7077"
+    networks: [back-tier]
+
+  spark-worker:
+    image: apache/spark:3.5.1
+    container_name: cpv-spark-worker
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    environment:
+      - SPARK_WORKER_MEMORY=2g
+      - SPARK_WORKER_CORES=2
+    depends_on: [spark-master]
+    networks: [back-tier]
+
+  # Bridges PostgreSQL `votes` table into Kafka topic `votes-raw`
+  vote-producer:
+    build: ./vote-producer
+    container_name: cpv-vote-producer
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    environment:
+      - DB_HOST=db
+      - DB_NAME=postgres
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - KAFKA_BOOTSTRAP=kafka:9092
+      - POLL_INTERVAL=2
+    networks: [back-tier]
+
+  # Spark Structured Streaming job maintaining votes_raw, votes_windowed, and vote_totals
+  spark-job:
+    build: ./spark-job
+    container_name: cpv-spark-job
+    restart: unless-stopped
+    depends_on:
+      kafka:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+      spark-master:
+        condition: service_started
+    networks: [back-tier]
+
+  # ============================================================
+  # ANALYTICS STORE + GRAFANA DASHBOARD
+  # ============================================================
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    container_name: cpv-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q '\"status\"'"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 20s
+    networks: [back-tier]
+
+  # One-shot: initializes votes_raw, votes_windowed, and vote_totals mappings
+  es-init:
+    build: ./es-init
+    container_name: cpv-es-init
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: "no"
+    networks: [back-tier]
+
+  grafana:
+    image: grafana/grafana:11.0.0
+    container_name: cpv-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks: [front-tier, back-tier]
+
+networks:
+  front-tier:
+  back-tier:
+
+volumes:
+  db_data:
+  es_data:
+  grafana_data:

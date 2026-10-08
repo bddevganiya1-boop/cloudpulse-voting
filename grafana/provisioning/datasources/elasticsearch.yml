@@ -1,0 +1,44 @@
+apiVersion: 1
+
+datasources:
+  - name: CloudPulse-VotesRaw
+    type: elasticsearch
+    access: proxy
+    url: http://elasticsearch:9200
+    uid: cpv-votes-raw
+    database: votes_raw
+    jsonData:
+      index: "votes_raw"
+      timeField: "event_timestamp"
+      esVersion: "8.0.0"
+      maxConcurrentShardRequests: 5
+    isDefault: false
+    editable: true
+
+  - name: CloudPulse-VotesWindowed
+    type: elasticsearch
+    access: proxy
+    url: http://elasticsearch:9200
+    uid: cpv-votes-windowed
+    database: votes_windowed
+    jsonData:
+      index: "votes_windowed"
+      timeField: "window_start"
+      esVersion: "8.0.0"
+      maxConcurrentShardRequests: 5
+    isDefault: true
+    editable: true
+
+  - name: CloudPulse-VoteTotals
+    type: elasticsearch
+    access: proxy
+    url: http://elasticsearch:9200
+    uid: cpv-vote-totals
+    database: vote_totals
+    jsonData:
+      index: "vote_totals"
+      timeField: "last_updated"
+      esVersion: "8.0.0"
+      maxConcurrentShardRequests: 5
+    isDefault: false
+    editable: true
