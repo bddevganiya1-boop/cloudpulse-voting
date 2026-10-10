@@ -132,7 +132,7 @@ services:
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - KAFKA_BOOTSTRAP=kafka:9092
-      - POLL_INTERVAL=2
+      - POLL_INTERVAL=0.1
     networks: [back-tier]
 
   # Spark Structured Streaming job maintaining votes_raw, votes_windowed, and vote_totals

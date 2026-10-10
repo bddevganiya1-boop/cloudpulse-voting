@@ -33,16 +33,19 @@ auto_voter_state = {
 }
 
 
-def get_redis():
-    """Provides a thread-safe Redis client instance."""
-    if not hasattr(g, "redis"):
-        g.redis = Redis(host=REDIS_HOST, db=0, socket_timeout=5)
-    return g.redis
+# Global Redis client with connection pooling
+redis_client = None
+
+def get_redis_client():
+    global redis_client
+    if redis_client is None:
+        redis_client = Redis(host=REDIS_HOST, db=0, socket_timeout=3, retry_on_timeout=True)
+    return redis_client
 
 
 def push_vote_to_redis(voter_id: str, vote_choice: str, is_simulated: bool = False):
     """Pushes a vote JSON payload into the Redis `votes` queue for the worker."""
-    client = Redis(host=REDIS_HOST, db=0, socket_timeout=5)
+    client = get_redis_client()
     payload = json.dumps({
         "voter_id": voter_id,
         "vote": vote_choice,
@@ -123,22 +126,31 @@ def index():
 def api_vote():
     """API endpoint for direct/client-side voting."""
     data = request.get_json(silent=True) or request.form
-    voter_id = data.get("voter_id") or hex(random.getrandbits(64))[2:-1]
-    vote = data.get("vote")
+    is_simulated = bool(data.get("is_simulated", False))
+    voter_id = data.get("voter_id")
+    if not voter_id and not is_simulated:
+        voter_id = request.cookies.get("voter_id")
+    if not voter_id:
+        voter_id = hex(random.getrandbits(64))[2:-1]
 
+    vote = data.get("vote")
     if vote not in ("a", "b"):
         return jsonify({"error": "Invalid vote. Must be 'a' or 'b'"}), 400
 
-    push_vote_to_redis(voter_id, vote, is_simulated=bool(data.get("is_simulated", False)))
+    push_vote_to_redis(voter_id, vote, is_simulated=is_simulated)
     label = option_a if vote == "a" else option_b
 
-    return jsonify({
+    resp = make_response(jsonify({
         "status": "success",
         "voter_id": voter_id,
         "vote": vote,
         "label": label,
+        "is_simulated": is_simulated,
         "timestamp": time.time(),
-    })
+    }))
+    if not is_simulated:
+        resp.set_cookie("voter_id", voter_id, max_age=3600*24*30)
+    return resp
 
 
 @app.route("/api/status", methods=["GET"])
@@ -146,6 +158,17 @@ def api_status():
     """Returns runtime telemetry for the voting app UI."""
     return jsonify({
         "hostname": hostname,
+        "option_a": option_a,
+        "option_b": option_b,
+        "auto_voter": auto_voter_state,
+        "server_time": time.time(),
+    })
+
+
+@app.route("/api/stats", methods=["GET"])
+def api_stats():
+    """Returns runtime state for live UI updates."""
+    return jsonify({
         "option_a": option_a,
         "option_b": option_b,
         "auto_voter": auto_voter_state,

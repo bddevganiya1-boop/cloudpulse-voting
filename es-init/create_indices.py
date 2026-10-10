@@ -14,6 +14,11 @@ ES_HOST = os.environ.get("ES_HOST", "elasticsearch:9200")
 
 INDEX_MAPPINGS = {
     "votes_raw": {
+        "settings": {
+            "index": {
+                "refresh_interval": "500ms"
+            }
+        },
         "mappings": {
             "properties": {
                 "voter_id": {"type": "keyword"},
@@ -24,6 +29,11 @@ INDEX_MAPPINGS = {
         }
     },
     "votes_windowed": {
+        "settings": {
+            "index": {
+                "refresh_interval": "500ms"
+            }
+        },
         "mappings": {
             "properties": {
                 "vote": {"type": "keyword"},
@@ -34,6 +44,11 @@ INDEX_MAPPINGS = {
         }
     },
     "vote_totals": {
+        "settings": {
+            "index": {
+                "refresh_interval": "500ms"
+            }
+        },
         "mappings": {
             "properties": {
                 "option": {"type": "keyword"},
@@ -65,9 +80,13 @@ def main():
     for index_name, body in INDEX_MAPPINGS.items():
         if es.indices.exists(index=index_name):
             print(f"[skip] index '{index_name}' already exists")
+            try:
+                es.indices.put_settings(index=index_name, settings={"index": {"refresh_interval": "500ms"}})
+            except Exception:
+                pass
             continue
         try:
-            es.indices.create(index=index_name, mappings=body.get("mappings"))
+            es.indices.create(index=index_name, mappings=body.get("mappings"), settings=body.get("settings"))
         except TypeError:
             es.indices.create(index=index_name, body=body)
         print(f"[created] index '{index_name}' successfully configured")

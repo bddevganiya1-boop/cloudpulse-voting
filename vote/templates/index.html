@@ -2,372 +2,420 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>{{option_a}} vs {{option_b}} · CloudPulse Big Data Voting</title>
+  <title>{{option_a}} vs {{option_b}} · CloudPulse Live Voting</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="CloudPulse High-Throughput Real-Time Voting Platform powered by Kafka, Spark & Elasticsearch">
+  <meta name="description" content="CloudPulse High-Throughput Real-Time Streaming Analytics Voting Platform">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-  <div class="ambient-glow glow-cyan"></div>
-  <div class="ambient-glow glow-amber"></div>
+  <!-- Ambient background glow -->
+  <div class="glow-sphere glow-a"></div>
+  <div class="glow-sphere glow-b"></div>
 
-  <div class="app-layout">
-    <!-- Top Navigation Bar -->
-    <header class="top-nav">
+  <div class="app-container">
+    <!-- Top Header -->
+    <header class="app-header">
       <div class="brand">
-        <div class="brand-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+        <div class="brand-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
           </svg>
         </div>
-        <div class="brand-text">
-          <h1>CloudPulse <span class="accent-text">Voting</span></h1>
-          <p class="brand-tag">Real-Time Streaming Analytics</p>
+        <div class="brand-info">
+          <div class="brand-title">
+            <span>CloudPulse</span>
+            <span class="badge-tag">STREAMING</span>
+          </div>
+          <span class="brand-subtitle">Live Voting Analytics Platform</span>
         </div>
       </div>
 
-      <div class="pipeline-indicators">
-        <div class="badge badge-kafka">
-          <span class="dot pulse"></span> Kafka: <span class="val">votes-raw</span>
+      <div class="header-status">
+        <div class="status-pill status-live">
+          <span class="pulse-indicator"></span>
+          <span>Pipeline: <strong>Active</strong></span>
         </div>
-        <div class="badge badge-spark">
-          <span class="dot pulse"></span> Spark: <span class="val">Streaming</span>
+        <div class="pipeline-flow-pill">
+          <span class="flow-step">Kafka</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step">Spark</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step">Elasticsearch</span>
         </div>
-        <div class="badge badge-es">
-          <span class="dot pulse"></span> ES: <span class="val">3 Indices</span>
-        </div>
+        <a href="http://localhost:3000" target="_blank" class="grafana-direct-link" title="Open Grafana Live Dashboard">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
+            <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.93V18h-2v-1.07A6 6 0 0 1 6.07 12H5v-2h1.07A6 6 0 0 1 11 4.07V3h2v1.07A6 6 0 0 1 17.93 10H19v2h-1.07A6 6 0 0 1 13 16.93zM12 6a6 6 0 1 0 6 6 6 6 0 0 0-6-6zm0 2a4 4 0 1 1-4 4 4 4 0 0 1 4-4z"/>
+          </svg>
+          <span>Live Grafana</span>
+        </a>
       </div>
     </header>
 
-    <!-- Auto-Voter Control Console -->
-    <section class="console-card">
-      <div class="console-header">
-        <div class="console-title-group">
-          <div class="pulse-indicator-ring">
-            <span class="pulse-dot"></span>
-          </div>
-          <div>
-            <h3>Auto-Voting Engine</h3>
-            <p class="console-sub">Pumping live telemetry into Kafka every <span id="interval-display">5.0</span> seconds</p>
-          </div>
-        </div>
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Section Title -->
+      <div class="section-hero">
+        <h1 class="hero-title">Cast Your Vote</h1>
+        <p class="hero-desc">Votes are ingested instantly and processed in real time across the streaming pipeline into Grafana.</p>
+      </div>
 
-        <div class="console-controls">
-          <button id="toggle-autovote-btn" class="btn btn-secondary" onclick="toggleAutoVote()">
-            <span id="autovote-status-icon">⏸️</span>
-            <span id="autovote-btn-text">Pause Auto-Voter</span>
-          </button>
-          <button class="btn btn-burst" onclick="triggerBurstVote()">
-            ⚡ Burst 5 Votes
-          </button>
+      <!-- Live Split Indicator -->
+      <div class="ratio-bar-wrapper">
+        <div class="ratio-header">
+          <span class="ratio-label-a">{{option_a}}: <strong id="ratio-count-a">0</strong></span>
+          <span class="ratio-center">HEAD TO HEAD</span>
+          <span class="ratio-label-b">{{option_b}}: <strong id="ratio-count-b">0</strong></span>
+        </div>
+        <div class="ratio-track">
+          <div id="ratio-fill-a" class="ratio-fill-a" style="width: 50%;"></div>
+          <div id="ratio-fill-b" class="ratio-fill-b" style="width: 50%;"></div>
         </div>
       </div>
 
-      <!-- Live Countdown Progress Bar -->
-      <div class="timer-container">
-        <div class="timer-bar-wrap">
-          <div id="countdown-bar" class="timer-bar"></div>
-        </div>
-        <div class="timer-labels">
-          <span id="timer-text">Next vote in: 5.0s</span>
-          <span id="counter-stats">Session Votes Generated: <strong id="session-count">0</strong></span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Main Battle Arena (Cat vs Dog) -->
-    <main class="battle-arena">
-      <div class="arena-title">
-        <h2>Choose Your Champion</h2>
-        <p>Click to cast your vote or watch the automated stream in real time</p>
-      </div>
-
-      <form id="vote-form" method="POST" action="/" class="cards-grid">
+      <!-- Voting Cards Arena -->
+      <div class="voting-grid">
         <!-- Option A: Cats -->
-        <div class="vote-card card-cat {% if vote == 'a' %}selected{% endif %}" id="card-cat">
-          <div class="card-glow"></div>
-          <div class="card-header">
-            <span class="team-badge">Team Cyan</span>
-            <span class="icon-bubble">🐱</span>
-          </div>
-
-          <div class="card-body">
-            <div class="avatar-wrap">
-              <svg class="pet-svg cat-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="50" cy="50" r="42" fill="url(#cat-grad)" stroke="#38bdf8" stroke-width="3"/>
+        <div class="vote-card card-option-a {% if vote == 'a' %}is-selected{% endif %}" id="card-option-a">
+          <div class="card-corner-badge">Option A</div>
+          <div class="card-icon-area">
+            <div class="icon-circle icon-circle-a">
+              <svg class="option-svg" viewBox="0 0 100 100" fill="none">
+                <circle cx="50" cy="50" r="42" fill="#0f172a" stroke="#0284c7" stroke-width="2.5"/>
                 <!-- Ears -->
-                <polygon points="25,28 35,5 45,26" fill="#0284c7" stroke="#38bdf8" stroke-width="2"/>
-                <polygon points="55,26 65,5 75,28" fill="#0284c7" stroke="#38bdf8" stroke-width="2"/>
+                <polygon points="26,29 35,8 46,26" fill="#0369a1" stroke="#38bdf8" stroke-width="2"/>
+                <polygon points="54,26 65,8 74,29" fill="#0369a1" stroke="#38bdf8" stroke-width="2"/>
                 <!-- Eyes -->
-                <ellipse cx="38" cy="46" rx="6" ry="9" fill="#38bdf8"/>
-                <ellipse cx="62" cy="46" rx="6" ry="9" fill="#38bdf8"/>
-                <circle cx="39" cy="45" r="2.5" fill="#ffffff"/>
-                <circle cx="63" cy="45" r="2.5" fill="#ffffff"/>
+                <ellipse cx="38" cy="46" rx="5.5" ry="8" fill="#38bdf8"/>
+                <ellipse cx="62" cy="46" rx="5.5" ry="8" fill="#38bdf8"/>
+                <circle cx="39" cy="45" r="2.2" fill="#ffffff"/>
+                <circle cx="63" cy="45" r="2.2" fill="#ffffff"/>
                 <!-- Nose & Mouth -->
-                <polygon points="50,56 46,51 54,51" fill="#f43f5e"/>
-                <path d="M46,57 Q50,62 50,58 Q50,62 54,57" stroke="#38bdf8" stroke-width="2" fill="none"/>
+                <polygon points="50,56 46,52 54,52" fill="#f43f5e"/>
+                <path d="M46,57 Q50,62 50,58 Q50,62 54,57" stroke="#38bdf8" stroke-width="1.8" fill="none"/>
                 <!-- Whiskers -->
-                <line x1="20" y1="52" x2="35" y2="54" stroke="#38bdf8" stroke-width="2"/>
-                <line x1="18" y1="60" x2="35" y2="59" stroke="#38bdf8" stroke-width="2"/>
-                <line x1="80" y1="52" x2="65" y2="54" stroke="#38bdf8" stroke-width="2"/>
-                <line x1="82" y1="60" x2="65" y2="59" stroke="#38bdf8" stroke-width="2"/>
-                <defs>
-                  <linearGradient id="cat-grad" x1="0" y1="0" x2="100" y2="100">
-                    <stop offset="0%" stop-color="#0f172a"/>
-                    <stop offset="100%" stop-color="#0369a1"/>
-                  </linearGradient>
-                </defs>
+                <line x1="22" y1="52" x2="35" y2="54" stroke="#38bdf8" stroke-width="1.5"/>
+                <line x1="20" y1="60" x2="35" y2="59" stroke="#38bdf8" stroke-width="1.5"/>
+                <line x1="78" y1="52" x2="65" y2="54" stroke="#38bdf8" stroke-width="1.5"/>
+                <line x1="80" y1="60" x2="65" y2="59" stroke="#38bdf8" stroke-width="1.5"/>
               </svg>
             </div>
+          </div>
 
-            <h3 class="option-name">{{option_a}}</h3>
-            <p class="option-tagline">Fierce · Independent · Nocturnal Strategists</p>
+          <div class="card-details">
+            <h2 class="card-name">{{option_a}}</h2>
+            <p class="card-tagline">Agile · Curious · Independent</p>
+          </div>
 
-            <div class="card-action">
-              <button type="submit" name="vote" value="a" class="btn btn-vote btn-cat" id="btn-cat">
-                <span class="btn-text">Vote for {{option_a}}</span>
-                <span class="check-icon">✓</span>
-              </button>
+          <div class="card-footer">
+            <button type="button" class="btn-vote btn-vote-a" id="btn-vote-a" onclick="submitManualVote('a')">
+              <span class="btn-vote-icon">✓</span>
+              <span class="btn-vote-text">Vote for {{option_a}}</span>
+            </button>
+            <div class="selected-state-text" id="status-text-a">
+              {% if vote == 'a' %}● Your Current Choice{% endif %}
             </div>
           </div>
         </div>
 
-        <!-- VS Divider -->
-        <div class="vs-badge-container">
-          <div class="vs-line"></div>
-          <div class="vs-circle">VS</div>
-          <div class="vs-line"></div>
+        <!-- Center VS Element -->
+        <div class="vs-column">
+          <div class="vs-badge">VS</div>
         </div>
 
         <!-- Option B: Dogs -->
-        <div class="vote-card card-dog {% if vote == 'b' %}selected{% endif %}" id="card-dog">
-          <div class="card-glow"></div>
-          <div class="card-header">
-            <span class="team-badge team-badge-orange">Team Amber</span>
-            <span class="icon-bubble">🐶</span>
-          </div>
-
-          <div class="card-body">
-            <div class="avatar-wrap">
-              <svg class="pet-svg dog-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="50" cy="50" r="42" fill="url(#dog-grad)" stroke="#f97316" stroke-width="3"/>
+        <div class="vote-card card-option-b {% if vote == 'b' %}is-selected{% endif %}" id="card-option-b">
+          <div class="card-corner-badge">Option B</div>
+          <div class="card-icon-area">
+            <div class="icon-circle icon-circle-b">
+              <svg class="option-svg" viewBox="0 0 100 100" fill="none">
+                <circle cx="50" cy="50" r="42" fill="#18181b" stroke="#d97706" stroke-width="2.5"/>
                 <!-- Floppy Ears -->
-                <path d="M22,25 C14,35 12,55 24,58 C28,52 28,32 25,25" fill="#ea580c" stroke="#f97316" stroke-width="2"/>
-                <path d="M78,25 C86,35 88,55 76,58 C72,52 72,32 75,25" fill="#ea580c" stroke="#f97316" stroke-width="2"/>
+                <path d="M22,26 C14,36 12,54 24,58 C28,52 28,33 25,26" fill="#b45309" stroke="#f59e0b" stroke-width="2"/>
+                <path d="M78,26 C86,36 88,54 76,58 C72,52 72,33 75,26" fill="#b45309" stroke="#f59e0b" stroke-width="2"/>
                 <!-- Eyes -->
-                <circle cx="38" cy="45" r="6" fill="#f97316"/>
-                <circle cx="62" cy="45" r="6" fill="#f97316"/>
-                <circle cx="39" cy="43" r="2.5" fill="#ffffff"/>
-                <circle cx="63" cy="43" r="2.5" fill="#ffffff"/>
+                <circle cx="38" cy="45" r="5.5" fill="#f59e0b"/>
+                <circle cx="62" cy="45" r="5.5" fill="#f59e0b"/>
+                <circle cx="39" cy="43" r="2.2" fill="#ffffff"/>
+                <circle cx="63" cy="43" r="2.2" fill="#ffffff"/>
                 <!-- Snout & Nose -->
                 <ellipse cx="50" cy="58" rx="14" ry="10" fill="#fed7aa"/>
-                <polygon points="50,56 44,50 56,50" fill="#7c2d12"/>
+                <polygon points="50,56 44,50 56,50" fill="#78350f"/>
                 <!-- Tongue -->
                 <path d="M47,65 Q50,73 53,65" fill="#f43f5e" stroke="#e11d48" stroke-width="1.5"/>
-                <defs>
-                  <linearGradient id="dog-grad" x1="0" y1="0" x2="100" y2="100">
-                    <stop offset="0%" stop-color="#18181b"/>
-                    <stop offset="100%" stop-color="#9a3412"/>
-                  </linearGradient>
-                </defs>
               </svg>
             </div>
+          </div>
 
-            <h3 class="option-name">{{option_b}}</h3>
-            <p class="option-tagline">Loyal · Boundless Energy · Ultimate Companions</p>
+          <div class="card-details">
+            <h2 class="card-name">{{option_b}}</h2>
+            <p class="card-tagline">Loyal · Energetic · Protective</p>
+          </div>
 
-            <div class="card-action">
-              <button type="submit" name="vote" value="b" class="btn btn-vote btn-dog" id="btn-dog">
-                <span class="btn-text">Vote for {{option_b}}</span>
-                <span class="check-icon">✓</span>
-              </button>
+          <div class="card-footer">
+            <button type="button" class="btn-vote btn-vote-b" id="btn-vote-b" onclick="submitManualVote('b')">
+              <span class="btn-vote-icon">✓</span>
+              <span class="btn-vote-text">Vote for {{option_b}}</span>
+            </button>
+            <div class="selected-state-text" id="status-text-b">
+              {% if vote == 'b' %}● Your Current Choice{% endif %}
             </div>
           </div>
         </div>
-      </form>
+      </div>
+
+      <!-- Traffic Simulator Toolbar -->
+      <section class="simulator-strip">
+        <div class="strip-left">
+          <div class="simulator-meta">
+            <span class="meta-title">Live Ingestion Simulator</span>
+            <span class="meta-sub">Emitting background telemetry into Kafka & Elasticsearch</span>
+          </div>
+        </div>
+
+        <div class="strip-actions">
+          <button type="button" id="toggle-sim-btn" class="strip-btn btn-secondary" onclick="toggleSimulation()">
+            <span id="sim-icon">⏸️</span>
+            <span id="sim-text">Pause Auto-Voter</span>
+          </button>
+          <button type="button" class="strip-btn btn-burst" onclick="triggerBurst()">
+            <span>⚡ Burst 5 Votes</span>
+          </button>
+        </div>
+
+        <div class="strip-progress-area">
+          <div class="strip-progress-bar">
+            <div id="sim-progress-fill" class="progress-fill"></div>
+          </div>
+          <div class="strip-stats">
+            <span id="sim-timer-label">Next vote in: 5.0s</span>
+            <span class="dot-sep">•</span>
+            <span>Session Votes: <strong id="session-vote-count">0</strong></span>
+          </div>
+        </div>
+      </section>
     </main>
 
-    <!-- Quick Observability Links Bar -->
-    <footer class="telemetry-bar">
-      <div class="voter-badge">
-        <span class="label">Voter Session ID:</span>
-        <code id="voter-id-display">{{voter_id}}</code>
+    <!-- Professional Footer -->
+    <footer class="app-footer">
+      <div class="footer-left">
+        <span class="session-label">Voter Session:</span>
+        <code class="session-code" id="session-voter-id">{{voter_id}}</code>
       </div>
 
-      <div class="quick-links">
-        <a href="http://localhost:3000" target="_blank" class="nav-pill pill-grafana">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
-          </svg>
-          Grafana Live Dashboard (:3000)
+      <div class="footer-links">
+        <a href="http://localhost:3000" target="_blank" class="footer-nav-link">
+          <span class="link-bullet">◈</span> Grafana Live Dashboard (:3000)
         </a>
-        <a href="http://localhost:8081" target="_blank" class="nav-pill pill-result">
-          📊 Results App (:8081)
+        <a href="http://localhost:8081" target="_blank" class="footer-nav-link">
+          <span class="link-bullet">◈</span> Results (:8081)
         </a>
-        <a href="http://localhost:8090" target="_blank" class="nav-pill pill-spark">
-          ⚡ Spark Master (:8090)
+        <a href="http://localhost:8090" target="_blank" class="footer-nav-link">
+          <span class="link-bullet">◈</span> Spark Master (:8090)
         </a>
       </div>
 
-      <div class="host-badge">
-        Container ID: <code>{{hostname}}</code>
+      <div class="footer-right">
+        <span>Host: <code>{{hostname}}</code></span>
       </div>
     </footer>
   </div>
 
-  <!-- Notification Toast -->
-  <div id="toast" class="toast">
-    <div class="toast-icon">🚀</div>
-    <div class="toast-content">
-      <h4 id="toast-title">Vote Recorded!</h4>
-      <p id="toast-body">Processed into Redis queue and streaming to Kafka</p>
+  <!-- Notification Toast Container -->
+  <div id="toast-notification" class="toast-card">
+    <div class="toast-glyph" id="toast-glyph">🚀</div>
+    <div class="toast-message">
+      <div class="toast-title" id="toast-title">Vote Recorded</div>
+      <div class="toast-desc" id="toast-desc">Streamed to Kafka and Elasticsearch</div>
     </div>
   </div>
 
   <script>
-    // Configuration & State
     const OPTION_A = "{{option_a}}";
     const OPTION_B = "{{option_b}}";
-    let voterId = "{{voter_id}}";
-    let autoVoteEnabled = true;
-    let autoVoteIntervalSeconds = 5.0;
-    let countdownRemaining = autoVoteIntervalSeconds;
-    let sessionVoteCount = 0;
-    let timerInterval = null;
+    let currentVoterId = "{{voter_id}}";
+    let activeUserChoice = "{{vote or ''}}";
+    
+    // Counts tracked locally for instant responsive bar feedback
+    let localVotesA = 0;
+    let localVotesB = 0;
+    let totalSessionVotes = 0;
 
-    // Toast Notification helper
-    function showToast(title, message, icon = '🚀') {
-      const toast = document.getElementById('toast');
-      document.getElementById('toast-title').innerText = title;
-      document.getElementById('toast-body').innerText = message;
-      document.querySelector('.toast-icon').innerText = icon;
-      toast.classList.add('show');
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, 3000);
+    let isAutoVoteEnabled = true;
+    let autoIntervalSec = {{auto_vote_interval or 5.0}};
+    let remainingTime = autoIntervalSec;
+    let countdownTimer = null;
+
+    // Toast notification
+    function notify(title, desc, glyph = '🚀') {
+      const toast = document.getElementById('toast-notification');
+      document.getElementById('toast-title').textContent = title;
+      document.getElementById('toast-desc').textContent = desc;
+      document.getElementById('toast-glyph').textContent = glyph;
+      toast.classList.add('visible');
+      clearTimeout(toast._timer);
+      toast._timer = setTimeout(() => {
+        toast.classList.remove('visible');
+      }, 2500);
     }
 
-    // Toggle Auto-Vote
-    function toggleAutoVote() {
-      autoVoteEnabled = !autoVoteEnabled;
-      const btnText = document.getElementById('autovote-btn-text');
-      const btnIcon = document.getElementById('autovote-status-icon');
-      const pulseDot = document.querySelector('.pulse-dot');
-
-      if (autoVoteEnabled) {
-        btnText.innerText = 'Pause Auto-Voter';
-        btnIcon.innerText = '⏸️';
-        countdownRemaining = autoVoteIntervalSeconds;
-        pulseDot.classList.remove('paused');
-        showToast('Auto-Voter Resumed', 'Generating simulated votes every 5 seconds', '⚡');
+    // Update Ratio Bar
+    function updateRatioDisplay() {
+      document.getElementById('ratio-count-a').textContent = localVotesA;
+      document.getElementById('ratio-count-b').textContent = localVotesB;
+      const total = localVotesA + localVotesB;
+      if (total === 0) {
+        document.getElementById('ratio-fill-a').style.width = '50%';
+        document.getElementById('ratio-fill-b').style.width = '50%';
       } else {
-        btnText.innerText = 'Resume Auto-Voter';
-        btnIcon.innerText = '▶️';
-        pulseDot.classList.add('paused');
-        showToast('Auto-Voter Paused', 'Manual voting is still active', '⏸️');
+        const pctA = Math.round((localVotesA / total) * 100);
+        const pctB = 100 - pctA;
+        document.getElementById('ratio-fill-a').style.width = `${pctA}%`;
+        document.getElementById('ratio-fill-b').style.width = `${pctB}%`;
       }
-
-      // Notify backend API
-      fetch('/api/auto-vote/toggle', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled: autoVoteEnabled, interval: autoVoteIntervalSeconds })
-      }).catch(err => console.log('Backend toggle sync:', err));
     }
 
-    // Trigger a single simulated vote
-    async function castSimulatedVote(voteChoice = null) {
-      if (!voteChoice) {
-        voteChoice = Math.random() < 0.5 ? 'a' : 'b';
-      }
-      const simVoterId = 'sim-' + Math.random().toString(16).substring(2, 10);
-      const label = voteChoice === 'a' ? OPTION_A : OPTION_B;
+    // Manual Vote with instant optimistic feedback (No page reload)
+    async function submitManualVote(choice) {
+      const isOptionA = choice === 'a';
+      const label = isOptionA ? OPTION_A : OPTION_B;
+      const glyph = isOptionA ? '🐱' : '🐶';
 
+      // Instant UI update
+      activeUserChoice = choice;
+      document.getElementById('card-option-a').classList.toggle('is-selected', isOptionA);
+      document.getElementById('card-option-b').classList.toggle('is-selected', !isOptionA);
+      document.getElementById('status-text-a').textContent = isOptionA ? '● Your Current Choice' : '';
+      document.getElementById('status-text-b').textContent = !isOptionA ? '● Your Current Choice' : '';
+
+      if (isOptionA) localVotesA++; else localVotesB++;
+      totalSessionVotes++;
+      document.getElementById('session-vote-count').textContent = totalSessionVotes;
+      updateRatioDisplay();
+
+      // Tactile button bounce
+      const btn = document.getElementById(isOptionA ? 'btn-vote-a' : 'btn-vote-b');
+      btn.classList.add('btn-clicked');
+      setTimeout(() => btn.classList.remove('btn-clicked'), 400);
+
+      notify(`Vote Submitted: ${label}`, `Immediate ingestion -> Kafka -> Spark -> Grafana`, glyph);
+
+      // Fast async dispatch to backend
       try {
         const resp = await fetch('/api/vote', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            voter_id: currentVoterId,
+            vote: choice,
+            is_simulated: false
+          })
+        });
+        const res = await resp.json();
+        if (res.voter_id) {
+          currentVoterId = res.voter_id;
+          document.getElementById('session-voter-id').textContent = currentVoterId;
+        }
+      } catch (err) {
+        console.error('Vote submission error:', err);
+      }
+    }
+
+    // Simulated Vote
+    async function emitSimulatedVote(specificChoice = null) {
+      const choice = specificChoice || (Math.random() < 0.5 ? 'a' : 'b');
+      const isOptionA = choice === 'a';
+      const label = isOptionA ? OPTION_A : OPTION_B;
+      const simVoterId = 'sim-' + Math.random().toString(16).substring(2, 10);
+
+      if (isOptionA) localVotesA++; else localVotesB++;
+      totalSessionVotes++;
+      document.getElementById('session-vote-count').textContent = totalSessionVotes;
+      updateRatioDisplay();
+
+      // Subtle pulse on receiving card
+      const targetCard = document.getElementById(isOptionA ? 'card-option-a' : 'card-option-b');
+      targetCard.classList.add('card-flash');
+      setTimeout(() => targetCard.classList.remove('card-flash'), 400);
+
+      try {
+        await fetch('/api/vote', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
             voter_id: simVoterId,
-            vote: voteChoice,
+            vote: choice,
             is_simulated: true
           })
         });
-
-        if (resp.ok) {
-          sessionVoteCount++;
-          document.getElementById('session-count').innerText = sessionVoteCount;
-
-          // Visual ripple effect on chosen card
-          const cardId = voteChoice === 'a' ? 'card-cat' : 'card-dog';
-          const card = document.getElementById(cardId);
-          if (card) {
-            card.classList.add('pulse-vote');
-            setTimeout(() => card.classList.remove('pulse-vote'), 600);
-          }
-
-          showToast(
-            `Simulated Vote: ${label}`,
-            `Voter: ${simVoterId} · Streamed to Redis & Kafka`,
-            voteChoice === 'a' ? '🐱' : '🐶'
-          );
-        }
-      } catch (err) {
-        console.error('Failed to cast vote:', err);
+      } catch (e) {
+        console.error('Sim vote error:', e);
       }
     }
 
-    // Burst 5 votes instantly
-    async function triggerBurstVote() {
-      showToast('Burst Triggered', 'Emitting 5 random votes across Cats & Dogs...', '⚡');
+    // Burst 5 votes
+    function triggerBurst() {
+      notify('Burst Test Triggered', 'Emitting 5 random live votes into stream...', '⚡');
       for (let i = 0; i < 5; i++) {
-        setTimeout(() => {
-          castSimulatedVote();
-        }, i * 200);
+        setTimeout(() => emitSimulatedVote(), i * 150);
       }
     }
 
-    // Countdown and automatic vote loop
-    function startCountdown() {
-      const bar = document.getElementById('countdown-bar');
-      const timerText = document.getElementById('timer-text');
-      const tickRateMs = 100;
-      const step = tickRateMs / 1000;
+    // Toggle Simulation
+    function toggleSimulation() {
+      isAutoVoteEnabled = !isAutoVoteEnabled;
+      const btnIcon = document.getElementById('sim-icon');
+      const btnText = document.getElementById('sim-text');
 
-      timerInterval = setInterval(() => {
-        if (!autoVoteEnabled) {
-          timerText.innerText = 'Auto-Voter: Paused';
-          bar.style.width = '0%';
+      if (isAutoVoteEnabled) {
+        btnIcon.textContent = '⏸️';
+        btnText.textContent = 'Pause Auto-Voter';
+        remainingTime = autoIntervalSec;
+        notify('Simulation Resumed', 'Emitting telemetry every 5s', '▶️');
+      } else {
+        btnIcon.textContent = '▶️';
+        btnText.textContent = 'Resume Auto-Voter';
+        notify('Simulation Paused', 'Manual voting remains active', '⏸️');
+      }
+
+      fetch('/api/auto-vote/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: isAutoVoteEnabled })
+      }).catch(err => console.log('Toggle error:', err));
+    }
+
+    // Countdown Progress loop
+    function startProgressLoop() {
+      const fillBar = document.getElementById('sim-progress-fill');
+      const timerLabel = document.getElementById('sim-timer-label');
+      const stepMs = 100;
+      const stepSec = stepMs / 1000;
+
+      countdownTimer = setInterval(() => {
+        if (!isAutoVoteEnabled) {
+          timerLabel.textContent = 'Auto-Voter: Paused';
+          fillBar.style.width = '0%';
           return;
         }
 
-        countdownRemaining -= step;
-
-        if (countdownRemaining <= 0) {
-          countdownRemaining = autoVoteIntervalSeconds;
-          castSimulatedVote();
+        remainingTime -= stepSec;
+        if (remainingTime <= 0) {
+          remainingTime = autoIntervalSec;
+          emitSimulatedVote();
         }
 
-        const percentage = ((autoVoteIntervalSeconds - countdownRemaining) / autoVoteIntervalSeconds) * 100;
-        bar.style.width = `${Math.min(100, Math.max(0, percentage))}%`;
-        timerText.innerText = `Next vote in: ${countdownRemaining.toFixed(1)}s`;
-      }, tickRateMs);
+        const pct = ((autoIntervalSec - remainingTime) / autoIntervalSec) * 100;
+        fillBar.style.width = `${Math.min(100, Math.max(0, pct))}%`;
+        timerLabel.textContent = `Next vote in: ${remainingTime.toFixed(1)}s`;
+      }, stepMs);
     }
 
-    // Initialize UI on load
     window.addEventListener('DOMContentLoaded', () => {
-      startCountdown();
-
-      // Highlight active user vote if already voted
-      const userVote = "{{vote}}";
-      if (userVote === 'a') {
-        document.getElementById('card-cat').classList.add('selected');
-      } else if (userVote === 'b') {
-        document.getElementById('card-dog').classList.add('selected');
-      }
+      startProgressLoop();
+      updateRatioDisplay();
     });
   </script>
 </body>

@@ -34,7 +34,7 @@ DB_NAME = os.environ.get("DB_NAME", "postgres")
 DB_USER = os.environ.get("DB_USER", "postgres")
 DB_PASSWORD = os.environ.get("DB_PASSWORD", "postgres")
 KAFKA_BOOTSTRAP = os.environ.get("KAFKA_BOOTSTRAP", "kafka:9092")
-POLL_INTERVAL = float(os.environ.get("POLL_INTERVAL", "2.0"))
+POLL_INTERVAL = float(os.environ.get("POLL_INTERVAL", "0.1"))
 TOPIC = "votes-raw"
 
 OPTION_LABELS = {
@@ -105,6 +105,7 @@ def main():
                 cur.execute("SELECT id, vote FROM votes")
                 rows = cur.fetchall()
 
+            new_votes_count = 0
             for voter_id, raw_vote in rows:
                 if last_seen.get(voter_id) == raw_vote:
                     continue  # already published, unchanged
@@ -119,10 +120,13 @@ def main():
                     "is_change": voter_id in last_seen,
                 }
                 producer.send(TOPIC, value=record)
-                producer.flush()
                 last_seen[voter_id] = raw_vote
+                new_votes_count += 1
                 log.info("🚀 Published vote to Kafka: voter=%s choice=%s (raw=%s) changed=%s",
                          voter_id, friendly_vote, raw_vote, record["is_change"])
+
+            if new_votes_count > 0:
+                producer.flush()
 
         except psycopg2.OperationalError as exc:
             log.warning("Lost DB connection (%s), reconnecting...", exc)

@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "Telegraf #928 inspired real-time streaming analytics dashboard for CloudPulse Voting (Cats vs Dogs)",
+  "description": "High-throughput real-time streaming analytics dashboard for CloudPulse Voting (Cats vs Dogs) powered by Kafka, Spark & Elasticsearch",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "gnetId": 928,
@@ -30,7 +30,7 @@
         "y": 0
       },
       "id": 100,
-      "title": "Quick overview",
+      "title": "⚡ Live Pipeline Overview & Ingestion Pulse",
       "type": "row"
     },
     {
@@ -44,7 +44,8 @@
             "fixedColor": "#38bdf8",
             "mode": "fixed"
           },
-          "unit": "short"
+          "unit": "short",
+          "decimals": 0
         },
         "overrides": []
       },
@@ -110,20 +111,25 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#10b981",
                 "value": null
               },
               {
-                "color": "yellow",
-                "value": 5
+                "color": "#eab308",
+                "value": 3
               },
               {
-                "color": "red",
+                "color": "#f97316",
+                "value": 8
+              },
+              {
+                "color": "#ef4444",
                 "value": 15
               }
             ]
           },
-          "unit": "short"
+          "unit": "short",
+          "decimals": 0
         },
         "overrides": []
       },
@@ -173,7 +179,7 @@
           "timeField": "event_timestamp"
         }
       ],
-      "title": "Active Voting Velocity (Rate)",
+      "title": "Active Voting Velocity",
       "type": "stat"
     },
     {
@@ -186,7 +192,7 @@
           "color": {
             "mode": "thresholds"
           },
-          "max": 500,
+          "max": 300,
           "min": 0,
           "thresholds": {
             "mode": "absolute",
@@ -197,7 +203,7 @@
               },
               {
                 "color": "#38bdf8",
-                "value": 50
+                "value": 30
               },
               {
                 "color": "#7dd3fc",
@@ -205,7 +211,8 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "short",
+          "decimals": 0
         },
         "overrides": []
       },
@@ -255,7 +262,7 @@
           "timeField": "event_timestamp"
         }
       ],
-      "title": "Cats Votes & Progress",
+      "title": "🐱 Cats Dominance",
       "type": "gauge"
     },
     {
@@ -268,7 +275,7 @@
           "color": {
             "mode": "thresholds"
           },
-          "max": 500,
+          "max": 300,
           "min": 0,
           "thresholds": {
             "mode": "absolute",
@@ -279,7 +286,7 @@
               },
               {
                 "color": "#f97316",
-                "value": 50
+                "value": 30
               },
               {
                 "color": "#fdba74",
@@ -287,7 +294,8 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "short",
+          "decimals": 0
         },
         "overrides": []
       },
@@ -337,7 +345,7 @@
           "timeField": "event_timestamp"
         }
       ],
-      "title": "Dogs Votes & Progress",
+      "title": "🐶 Dogs Dominance",
       "type": "gauge"
     },
     {
@@ -356,7 +364,7 @@
               "options": {
                 "match": "null",
                 "result": {
-                  "text": "HEALTHY / STREAMING"
+                  "text": "HEALTHY / LIVE STREAMING"
                 }
               },
               "type": "special"
@@ -423,7 +431,7 @@
         "y": 5
       },
       "id": 200,
-      "title": "Voting Rate & Streaming Dynamics",
+      "title": "📊 Real-Time Voting Dynamics & Velocity",
       "type": "row"
     },
     {
@@ -438,7 +446,7 @@
           },
           "custom": {
             "drawStyle": "line",
-            "fillOpacity": 25,
+            "fillOpacity": 30,
             "gradientMode": "opacity",
             "lineInterpolation": "smooth",
             "lineWidth": 2,
@@ -493,10 +501,9 @@
       "options": {
         "legend": {
           "calcs": [
-            "mean",
             "lastNotNull",
             "max",
-            "min",
+            "mean",
             "sum"
           ],
           "displayMode": "table",
@@ -546,7 +553,7 @@
           "timeField": "event_timestamp"
         }
       ],
-      "title": "Voting Rate Over Time \u2014 Cats vs Dogs",
+      "title": "Voting Rate Over Time — Cats vs Dogs",
       "type": "timeseries"
     },
     {
@@ -661,7 +668,7 @@
         "y": 15
       },
       "id": 300,
-      "title": "Leaderboard & Raw Audit Stream",
+      "title": "🏆 Live Standings & Raw Ingestion Event Feed",
       "type": "row"
     },
     {
@@ -678,18 +685,49 @@
             "mode": "percentage",
             "steps": [
               {
-                "color": "blue",
+                "color": "#0284c7",
                 "value": null
               },
               {
-                "color": "orange",
+                "color": "#ea580c",
                 "value": 50
               }
             ]
           },
           "unit": "short"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Cats"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#38bdf8",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Dogs"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#f97316",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -736,7 +774,7 @@
           "timeField": "event_timestamp"
         }
       ],
-      "title": "Live Leaderboard (Votes per Option)",
+      "title": "Live Leaderboard",
       "type": "bargauge"
     },
     {
@@ -776,11 +814,11 @@
                   {
                     "options": {
                       "Cats": {
-                        "color": "rgba(56, 189, 248, 0.35)",
+                        "color": "rgba(56, 189, 248, 0.4)",
                         "index": 0
                       },
                       "Dogs": {
-                        "color": "rgba(249, 115, 22, 0.35)",
+                        "color": "rgba(249, 115, 22, 0.4)",
                         "index": 1
                       }
                     },
@@ -848,11 +886,11 @@
           "timeField": "event_timestamp"
         }
       ],
-      "title": "Recent Raw Votes Stream (Audit Trail)",
+      "title": "Recent Raw Votes Stream (Live Audit Feed)",
       "type": "table"
     }
   ],
-  "refresh": "5s",
+  "refresh": "1s",
   "schemaVersion": 39,
   "style": "dark",
   "tags": [
@@ -862,17 +900,18 @@
     "spark",
     "kafka",
     "elasticsearch",
-    "telegraf-928"
+    "realtime"
   ],
   "templating": {
     "list": []
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {
     "refresh_intervals": [
+      "1s",
       "2s",
       "5s",
       "10s",
@@ -881,6 +920,7 @@
       "5m"
     ],
     "time_options": [
+      "1m",
       "5m",
       "15m",
       "30m",
@@ -892,7 +932,7 @@
     ]
   },
   "timezone": "browser",
-  "title": "CloudPulse \u2014 Live Voting Analytics (Telegraf #928 Edition)",
+  "title": "CloudPulse — Live Real-Time Voting Analytics",
   "uid": "cloudpulse-voting-dashboard",
-  "version": 8
+  "version": 10
 }

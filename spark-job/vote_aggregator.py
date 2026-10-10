@@ -59,7 +59,7 @@ def write_batch_to_es(df, es_host: str, index: str):
     payload = "\n".join(bulk_lines) + "\n"
     try:
         resp = requests.post(
-            f"http://{es_host}/_bulk",
+            f"http://{es_host}/_bulk?refresh=true",
             data=payload,
             headers={"Content-Type": "application/x-ndjson"},
             timeout=10,
@@ -96,7 +96,7 @@ def upsert_running_totals(df, es_host: str):
     payload = "\n".join(bulk_lines) + "\n"
     try:
         resp = requests.post(
-            f"http://{es_host}/_bulk",
+            f"http://{es_host}/_bulk?refresh=true",
             data=payload,
             headers={"Content-Type": "application/x-ndjson"},
             timeout=10,
@@ -158,6 +158,7 @@ def main():
     # 1. Full audit trail -> votes_raw
     raw_query = (
         votes.writeStream
+        .trigger(processingTime="100 milliseconds")
         .foreachBatch(lambda df, eid: process_raw_batch(df, eid, args.es_host))
         .option("checkpointLocation", f"{args.checkpoint_dir}/raw")
         .start()
@@ -172,6 +173,7 @@ def main():
     )
     windowed_query = (
         windowed.writeStream
+        .trigger(processingTime="500 milliseconds")
         .outputMode("update")
         .foreachBatch(lambda df, eid: process_windowed_batch(df, eid, args.es_host))
         .option("checkpointLocation", f"{args.checkpoint_dir}/windowed")
@@ -185,6 +187,7 @@ def main():
     )
     totals_query = (
         totals.writeStream
+        .trigger(processingTime="100 milliseconds")
         .outputMode("update")
         .foreachBatch(lambda df, eid: process_totals_batch(df, eid, args.es_host))
         .option("checkpointLocation", f"{args.checkpoint_dir}/totals")
